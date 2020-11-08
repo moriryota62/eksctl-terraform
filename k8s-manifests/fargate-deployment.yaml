@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: fargate-deployment
+    fargate: "true"
+  name: fargate-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fargate-deployment
+  template:
+    metadata:
+      labels:
+        app: fargate-deployment
+        fargate: "true"
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        resources:
+          requests:
+            memory: "500Mi"
+            cpu: "250m"

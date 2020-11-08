@@ -4,8 +4,8 @@ variable "tags" {
   type        = map(string)
 }
 
-variable "pj" {
-  description = "リソース群に付与する接頭語"
+variable "base_name" {
+  description = "作成するリソースに付与する接頭語"
   type        = string
 }
 

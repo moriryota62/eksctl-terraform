@@ -1,0 +1,38 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: dvp-ebs
+  name: dvp-ebs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dvp-ebs
+  template:
+    metadata:
+      labels:
+        app: dvp-ebs
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        volumeMounts:
+          - name: dvp-ebs
+            mountPath: /tmp
+      volumes:
+        - name: dvp-ebs
+          persistentVolumeClaim: 
+            claimName: dvp-ebs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dvp-ebs
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

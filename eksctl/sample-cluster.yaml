@@ -1,0 +1,95 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: PJ-NAME-ENV
+  region: us-east-2
+  version: "1.18"
+
+# pod to iam
+iam:
+  withOIDC: true
+
+cloudWatch:
+  clusterLogging:
+   enableTypes: ["*"]
+
+vpc:
+  id: "vpc-096168dff711596df"  # (optional, must match VPC ID used for each subnet below)
+  subnets:
+    public:
+      us-east-2b:
+        id: "subnet-064726ea0cc57812a"
+      us-east-2c:
+        id: "subnet-0a303cbae39914d8f"
+    private:
+      us-east-2b:
+        id: "subnet-0a62923916ea37d73"
+      us-east-2c:
+        id: "subnet-0ce71b2f3a4890401"
+  clusterEndpoints:
+    publicAccess: true
+  #   privateAccess: true
+  # publicAccessCIDRs: [""]
+
+
+managedNodeGroups:
+  - name: app-ng
+    instanceType: m5.large
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 4
+    availabilityZones: ["us-east-2b"]
+    volumeSize: 20
+    privateNetworking: true
+    # securityGroups:
+    #   attachIDs: ["NODEGROUPSG"]
+    ssh:
+      allow: true
+      publicKeyName: mori
+    #   # new feature for restricting SSH access to certain AWS security group IDs
+    #   sourceSecurityGroupIds: ["sg-00241fbb12c607007"]
+    labels: {role: app}
+    tags:
+      nodegroup-role: app
+    # iam:
+    #   withAddonPolicies:
+    #     externalDNS: true
+    #     certManager: true
+  - name: infra-ng
+    instanceType: m5.large
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 2
+    availabilityZones: ["us-east-2b"]
+    volumeSize: 20
+    privateNetworking: true
+    # securityGroups:
+    #   attachIDs: ["NODEGROUPSG"]
+    ssh:
+      allow: true
+      publicKeyName: mori
+    #   # new feature for restricting SSH access to certain AWS security group IDs
+    #   sourceSecurityGroupIds: ["sg-00241fbb12c607007"]
+    labels: {role: infra}
+    tags:
+      nodegroup-role: infra
+    # iam:
+    #   withAddonPolicies:
+    #     imageBuilder: true
+    #     autoScaler: true
+    #     certManager: true
+    #     ebs: true
+
+fargateProfiles:
+  - name: fp-default
+    selectors:
+      # All workloads in the "default" Kubernetes namespace will be
+      # scheduled onto Fargate:
+      - namespace: default
+        labels:
+          fargate: "true"
+
+secretsEncryption:
+  # ARN of the KMS key
+  keyARN: "arn:aws:kms:us-east-2:456247443832:key/c6978b83-3bdd-4bfe-86f4-c3a741503583"

@@ -1,11 +1,11 @@
 resource "aws_eip" "natgw" {
   count = length(var.subnet_public_cidrs)
-  vpc = true
+  vpc   = true
 
   tags = merge(
-  {
-    "Name" = "${var.pj}-natgw-eip-${count.index}"
-  },
-  var.tags
+    {
+      "Name" = "${var.base_name}-natgw-eip-${count.index}"
+    },
+    var.tags
   )
 }

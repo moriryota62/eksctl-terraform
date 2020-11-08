@@ -1,21 +1,21 @@
 resource "aws_security_group" "ecr_endpoint" {
-  name        = "${var.pj}-ecr-endpoint-sg"
+  name        = "${var.base_name}-ecr-endpoint-sg"
   vpc_id      = aws_vpc.main.id
   description = "For ECR Endpoint"
 
   tags = merge(
     {
-      "Name" = "${var.pj}-ecr-endpoint-sg"
+      "Name" = "${var.base_name}-ecr-endpoint-sg"
     },
     var.tags
   )
 
   ingress {
-    description     = "Allow ECR access from subnets"
-    from_port       = 443
-    to_port         = 443
-    protocol        = "tcp"
-    cidr_blocks = flatten([var.subnet_public_cidrs,var.subnet_private_cidrs])
+    description = "Allow ECR access from subnets"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = flatten([var.subnet_public_cidrs, var.subnet_private_cidrs])
   }
 
   egress {

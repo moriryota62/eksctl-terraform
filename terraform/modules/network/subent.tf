@@ -5,11 +5,13 @@ resource "aws_subnet" "public" {
 
   vpc_id            = aws_vpc.main.id
   cidr_block        = var.subnet_public_cidrs[count.index]
-  availability_zone = data.aws_availability_zones.available.names[ count.index + 1]
+  availability_zone = data.aws_availability_zones.available.names[count.index + 1]
 
   tags = merge(
     {
-      "Name" = "${var.pj}-public-subnet-${count.index}"
+      "Name"                                   = "${var.base_name}-public-subnet-${count.index}",
+      "kubernetes.io/cluster/${var.base_name}" = "shared",
+      "kubernetes.io/role/elb"                 = 1
     },
     var.tags
   )
@@ -18,13 +20,15 @@ resource "aws_subnet" "public" {
 resource "aws_subnet" "private" {
   count = length(var.subnet_private_cidrs)
 
-  vpc_id     = aws_vpc.main.id
-  cidr_block = var.subnet_private_cidrs[count.index]
-  availability_zone = data.aws_availability_zones.available.names[ count.index + 1]
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = var.subnet_private_cidrs[count.index]
+  availability_zone = data.aws_availability_zones.available.names[count.index + 1]
 
   tags = merge(
     {
-      "Name" = "${var.pj}-private-subnet-${count.index}"
+      "Name"                                   = "${var.base_name}-private-subnet-${count.index}",
+      "kubernetes.io/cluster/${var.base_name}" = "shared",
+      "kubernetes.io/role/internal-elb"        = 1
     },
     var.tags
   )

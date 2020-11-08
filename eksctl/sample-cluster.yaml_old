@@ -1,0 +1,95 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: PJ-ENV
+  region: REGION
+  version: "1.18"
+
+# pod to iam
+iam:
+  withOIDC: true
+
+cloudWatch:
+  clusterLogging:
+   enableTypes: ["*"]
+
+vpc:
+  id: "VPCID"  # (optional, must match VPC ID used for each subnet below)
+  subnets:
+    public:
+      us-east-2b:
+        id: "PUBLICSUBNET1"
+      us-east-2c:
+        id: "PUBLICSUBNET2"
+    private:
+      us-east-2b:
+        id: "PRIVATESUBNET1"
+      us-east-2c:
+        id: "PRIVATESUBNET2"
+  clusterEndpoints:
+    publicAccess: true
+    privateAccess: true
+  publicAccessCIDRs: ["YOURCIDR"]
+
+
+managedNodeGroups:
+  - name: app-ng
+    instanceType: m5.large
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 4
+    availabilityZones: ["us-east-2b"]
+    volumeSize: 20
+    privateNetworking: true
+    # securityGroups:
+    #   attachIDs: ["NODEGROUPSG"]
+    ssh:
+      allow: true
+      publicKeyName: KEYNAME
+    #   # new feature for restricting SSH access to certain AWS security group IDs
+    #   sourceSecurityGroupIds: ["sg-00241fbb12c607007"]
+    labels: {role: app}
+    tags:
+      nodegroup-role: app
+    # iam:
+    #   withAddonPolicies:
+    #     externalDNS: true
+    #     certManager: true
+  - name: infra-ng
+    instanceType: m5.large
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 2
+    availabilityZones: ["us-east-2b"]
+    volumeSize: 20
+    privateNetworking: true
+    # securityGroups:
+    #   attachIDs: ["NODEGROUPSG"]
+    ssh:
+      allow: true
+      publicKeyName: KEYNAME
+    #   # new feature for restricting SSH access to certain AWS security group IDs
+    #   sourceSecurityGroupIds: ["sg-00241fbb12c607007"]
+    labels: {role: infra}
+    tags:
+      nodegroup-role: infra
+    # iam:
+    #   withAddonPolicies:
+    #     imageBuilder: true
+    #     autoScaler: true
+    #     certManager: true
+    #     ebs: true
+
+fargateProfiles:
+  - name: fp-default
+    selectors:
+      # All workloads in the "default" Kubernetes namespace will be
+      # scheduled onto Fargate:
+      - namespace: default
+        labels:
+          fargate: "true"
+
+secretsEncryption:
+  # ARN of the KMS key
+  keyARN: "KMSARN"
